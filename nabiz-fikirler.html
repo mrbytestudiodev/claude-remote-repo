@@ -1,0 +1,72 @@
+<title>Nabız Fikirleri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;800&display=swap">
+<style>
+/* Düzen: dört telefon taslağı yan yana, dar ekranda alt alta */
+:root { color-scheme: dark; --zemin: #0B0D1F; --yuzey: #161A35; --metin: #F2F3FA; --soluk: #A3A8CC; --pembe: #FF6FB1; --cam: #3DD6F5; --amber: #FFB547; }
+body { background: var(--zemin); color: var(--metin); font-family: 'Rubik', system-ui, sans-serif; padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1 { font-size: 28px; margin: 0 0 20px; }
+.izgara { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.kart { background: var(--yuzey); border-radius: 28px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.kart.favori { box-shadow: 0 0 0 2px var(--amber); }
+svg { width: 100%; max-width: 100%; height: auto; border-radius: 20px; background: var(--zemin); }
+h2 { font-size: 18px; margin: 0; display: flex; gap: 8px; align-items: center; }
+h2 span { font-size: 11px; padding: 3px 8px; border-radius: 99px; background: var(--amber); color: var(--zemin); }
+p { margin: 0; color: var(--soluk); font-size: 14px; line-height: 1.45; }
+</style>
+
+<h1>Nabız için dört mekanik</h1>
+<div class="izgara">
+
+  <div class="kart">
+    <svg viewBox="0 0 200 300" role="img" aria-label="Ayrılan ikizler taslağı">
+      <rect x="20" y="40" width="60" height="14" rx="7" fill="#FF6FB1"/><rect x="120" y="40" width="60" height="14" rx="7" fill="#FF6FB1"/>
+      <rect x="0" y="120" width="70" height="14" rx="7" fill="#3DD6F5"/><rect x="130" y="120" width="70" height="14" rx="7" fill="#3DD6F5"/>
+      <line x1="62" y1="230" x2="138" y2="230" stroke="#A3A8CC" stroke-width="2" stroke-dasharray="4 4"/>
+      <circle cx="62" cy="230" r="12" fill="#FF6FB1"/><circle cx="138" cy="230" r="12" fill="#3DD6F5"/>
+      <path d="M40 270h-20m0 0l8-6m-8 6l8 6M160 270h20m0 0l-8-6m8 6l-8 6" stroke="#F2F3FA" stroke-width="2" fill="none"/>
+      <text x="100" y="275" fill="#A3A8CC" font-size="11" text-anchor="middle">aç / kapat</text>
+    </svg>
+    <h2>1. Ayrılan ikizler</h2>
+    <p>Parmağını açınca küreler ayrılıyor, kapatınca yaklaşıyor. Engellerdeki boşluğa göre aralığı ayarlıyorsun.</p>
+  </div>
+
+  <div class="kart favori">
+    <svg viewBox="0 0 200 300" role="img" aria-label="Renk değiştiren küre taslağı">
+      <rect x="0" y="50" width="65" height="14" rx="7" fill="#3DD6F5"/><rect x="68" y="50" width="64" height="14" rx="7" fill="#FF6FB1" opacity=".35"/><rect x="135" y="50" width="65" height="14" rx="7" fill="#3DD6F5"/>
+      <rect x="0" y="140" width="65" height="14" rx="7" fill="#FF6FB1"/><rect x="68" y="140" width="64" height="14" rx="7" fill="#3DD6F5" opacity=".35"/><rect x="135" y="140" width="65" height="14" rx="7" fill="#FF6FB1"/>
+      <circle cx="100" cy="230" r="16" fill="#3DD6F5"/><circle cx="100" cy="230" r="26" fill="none" stroke="#3DD6F5" stroke-opacity=".4" stroke-width="2"/>
+      <text x="100" y="275" fill="#A3A8CC" font-size="11" text-anchor="middle">dokun = renk değiştir</text>
+    </svg>
+    <h2>2. Renk değiştiren küre <span>FAVORİM</span></h2>
+    <p>Sadece kendi renginle aynı kapıdan geçebiliyorsun. Kapılar vuruşla geliyor, her dokunuş bir nota gibi.</p>
+  </div>
+
+  <div class="kart">
+    <svg viewBox="0 0 200 300" role="img" aria-label="Yörünge taslağı">
+      <circle cx="100" cy="150" r="10" fill="#FFB547"/>
+      <circle cx="100" cy="150" r="45" fill="none" stroke="#A3A8CC" stroke-opacity=".5" stroke-width="2"/>
+      <circle cx="100" cy="150" r="80" fill="none" stroke="#A3A8CC" stroke-opacity=".5" stroke-width="2"/>
+      <circle cx="180" cy="150" r="10" fill="#3DD6F5"/>
+      <rect x="92" y="62" width="16" height="22" rx="5" fill="#FF6FB1"/><rect x="40" y="185" width="16" height="22" rx="5" fill="#FF6FB1"/>
+      <path d="M170 150h-30" stroke="#F2F3FA" stroke-width="2" stroke-dasharray="3 3"/>
+      <text x="100" y="275" fill="#A3A8CC" font-size="11" text-anchor="middle">dokun = iç / dış yörünge</text>
+    </svg>
+    <h2>3. Yörünge</h2>
+    <p>Küre merkezin etrafında dönüyor. Dokununca yörünge değiştiriyorsun, engeller iki halkada da vuruşla beliriyor.</p>
+  </div>
+
+  <div class="kart">
+    <svg viewBox="0 0 200 300" role="img" aria-label="Ayna taslağı">
+      <line x1="100" y1="0" x2="100" y2="300" stroke="#A3A8CC" stroke-opacity=".5" stroke-width="2"/>
+      <rect x="10" y="60" width="50" height="14" rx="7" fill="#FF6FB1"/><rect x="150" y="100" width="40" height="14" rx="7" fill="#3DD6F5"/>
+      <rect x="40" y="150" width="55" height="14" rx="7" fill="#FF6FB1"/><rect x="110" y="40" width="40" height="14" rx="7" fill="#3DD6F5"/>
+      <circle cx="30" cy="230" r="12" fill="#FF6FB1"/><circle cx="170" cy="230" r="12" fill="#3DD6F5"/>
+      <path d="M45 250h25m0 0l-6-5m6 5l-6 5M155 250h-25m0 0l6-5m-6 5l6 5" stroke="#F2F3FA" stroke-width="2" fill="none"/>
+      <text x="100" y="285" fill="#A3A8CC" font-size="11" text-anchor="middle">biri gider, öteki tersine</text>
+    </svg>
+    <h2>4. Ayna</h2>
+    <p>Soldaki küreyi kaydırıyorsun, sağdaki tersini yapıyor. İki taraftaki engeller birbirinden farklı.</p>
+  </div>
+
+</div>
