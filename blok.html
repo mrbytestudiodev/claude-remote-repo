@@ -1,0 +1,192 @@
+<title>Renk Blok</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;800&display=swap">
+<style>
+/* Düzen: üstte skor, ortada 8x8 tahta, altta üç parça; tek tuval */
+:root { color-scheme: dark; --zemin: #0F1226; --metin: #F2F3FA; --soluk: #A3A8CC; --amber: #FFB547; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--zemin); color: var(--metin); font-family: 'Rubik', system-ui, sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+canvas { display: block; width: 100%; height: 100%; }
+#son { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(15,18,38,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); }
+#son div { background: rgba(26,31,61,.92); border-radius: 28px; padding: 24px; text-align: center; max-width: 340px; width: 100%; display: flex; flex-direction: column; gap: 12px; }
+#son h2 { margin: 0; font-size: 30px; }
+#son p { margin: 0; color: var(--soluk); line-height: 1.45; }
+#son button { border: 0; border-radius: 999px; padding: 15px; font: 800 17px 'Rubik', sans-serif; background: var(--amber); color: #0F1226; cursor: pointer; }
+</style>
+
+<canvas id="c"></canvas>
+<div id="son" hidden><div>
+  <h2>Yer kalmadı</h2>
+  <p id="son-yazi"></p>
+  <button id="tekrar">Tekrar oyna</button>
+</div></div>
+
+<script>
+// Kural: satır ya da sütunu doldur, temizlensin. Tek renkten oluşan satır ×5 puan verir.
+const N = 8;
+const RENKLER = ['#3DD6F5', '#FF6FB1', '#FFB547', '#A47BFF', '#4ADE80'];
+const SEKILLER = [
+  [[0,0]], [[0,0],[1,0]], [[0,0],[0,1]], [[0,0],[1,0],[2,0]], [[0,0],[0,1],[0,2]],
+  [[0,0],[1,0],[0,1],[1,1]], [[0,0],[1,0],[2,0],[3,0]], [[0,0],[0,1],[0,2],[0,3]],
+  [[0,0],[0,1],[1,1]], [[1,0],[0,1],[1,1]], [[0,0],[1,0],[1,1]], [[0,0],[1,0],[0,1]],
+  [[0,0],[1,0],[2,0],[0,1]], [[0,0],[1,0],[2,0],[2,1]], [[0,0],[1,0],[2,0],[1,1]],
+  [[0,0],[1,0],[2,0],[0,1],[1,1],[2,1],[0,2],[1,2],[2,2]],
+];
+const oku = (k, v) => { try { return JSON.parse(localStorage.getItem(k)) ?? v; } catch { return v; } };
+const tuval = document.getElementById('c'), g = tuval.getContext('2d');
+let W, H, O, hucre, tx, ty, tepsiY;
+let tahta, parcalar, skor, kombo, rekor = oku('blok.rekor', 0), surukle = null, efekt = [], yazilar = [], sars = 0, gosterSkor = 0;
+let ses;
+
+function boyutla() {
+  O = devicePixelRatio || 1; W = innerWidth; H = innerHeight;
+  tuval.width = W * O; tuval.height = H * O;
+  hucre = Math.floor(Math.min((W - 32) / N, (H * 0.56) / N, 52));
+  tx = (W - hucre * N) / 2; ty = Math.max(90, H * 0.14);
+  tepsiY = ty + hucre * N + Math.max(40, (H - ty - hucre * N) / 2 - 20);
+}
+addEventListener('resize', boyutla); boyutla();
+
+function ton(f, sure = 0.12, tip = 'triangle', guc = 0.08, gec = 0) {
+  if (!ses) return;
+  const t = ses.currentTime + gec, o = ses.createOscillator(), k = ses.createGain();
+  o.type = tip; o.frequency.setValueAtTime(f, t);
+  k.gain.setValueAtTime(guc, t); k.gain.exponentialRampToValueAtTime(0.0001, t + sure);
+  o.connect(k).connect(ses.destination); o.start(t); o.stop(t + sure);
+}
+
+function yeniParca() {
+  return { sekil: SEKILLER[Math.floor(Math.random() * SEKILLER.length)], renk: RENKLER[Math.floor(Math.random() * RENKLER.length)] };
+}
+function yeniOyun() {
+  tahta = Array.from({ length: N }, () => Array(N).fill(null));
+  parcalar = [yeniParca(), yeniParca(), yeniParca()];
+  skor = 0; kombo = 0; gosterSkor = 0;
+  document.getElementById('son').hidden = true;
+}
+
+const sigar = (p, gx, gy) => p.sekil.every(([x, y]) => gx + x >= 0 && gy + y >= 0 && gx + x < N && gy + y < N && !tahta[gy + y][gx + x]);
+const yerVar = (p) => { for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (sigar(p, x, y)) return true; return false; };
+const boyut = (p) => [Math.max(...p.sekil.map((h) => h[0])) + 1, Math.max(...p.sekil.map((h) => h[1])) + 1];
+
+function yerlestir(i, gx, gy) {
+  const p = parcalar[i];
+  p.sekil.forEach(([x, y]) => (tahta[gy + y][gx + x] = p.renk));
+  skor += p.sekil.length;
+  parcalar[i] = null;
+  ton(330, 0.08, 'sine', 0.1);
+
+  const satirlar = [], sutunlar = [];
+  for (let k = 0; k < N; k++) {
+    if (tahta[k].every(Boolean)) satirlar.push(k);
+    if (tahta.every((s) => s[k])) sutunlar.push(k);
+  }
+  const hatlar = [...satirlar.map((k) => tahta[k]), ...sutunlar.map((k) => tahta.map((s) => s[k]))];
+  const adet = hatlar.length;
+  if (adet) {
+    kombo++;
+    const tekRenk = hatlar.filter((h) => h.every((r) => r === h[0])).length;
+    let kazanc = 10 * adet * adet * kombo * (tekRenk ? 5 * tekRenk : 1);
+    skor += kazanc;
+    const silinecek = new Set();
+    satirlar.forEach((y) => { for (let x = 0; x < N; x++) silinecek.add(x + ',' + y); });
+    sutunlar.forEach((x) => { for (let y = 0; y < N; y++) silinecek.add(x + ',' + y); });
+    silinecek.forEach((a) => {
+      const [x, y] = a.split(',').map(Number), renk = tahta[y][x];
+      for (let j = 0; j < 4; j++) efekt.push({ x: tx + (x + 0.5) * hucre, y: ty + (y + 0.5) * hucre, vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.9) * 8, renk, omur: 1 });
+      tahta[y][x] = null;
+    });
+    sars = Math.min(1, 0.3 + adet * 0.2 + (tekRenk ? 0.4 : 0));
+    const mx = tx + (gx + 1) * hucre, my = ty + gy * hucre;
+    if (tekRenk) yazilar.push({ metin: 'RENK PATLAMASI ×5', x: W / 2, y: ty + hucre * N / 2 - 30, renk: hatlar[0][0], boy: 30, omur: 1 });
+    if (kombo > 1) yazilar.push({ metin: `KOMBO ×${kombo}`, x: W / 2, y: ty + hucre * N / 2 + 10, renk: '#FFB547', boy: 34, omur: 1 });
+    yazilar.push({ metin: '+' + kazanc, x: mx, y: my, renk: '#F2F3FA', boy: 24, omur: 1 });
+    [523, 659, 784, 1047, 1319].slice(0, 1 + adet + Math.min(kombo, 3)).forEach((f, j) => ton(f * (tekRenk ? 1.5 : 1), 0.25, 'triangle', 0.09, j * 0.06));
+    try { navigator.vibrate?.([15, 30, 15]); } catch {}
+  } else kombo = 0;
+
+  if (parcalar.every((x) => !x)) parcalar = [yeniParca(), yeniParca(), yeniParca()];
+  if (!parcalar.some((x) => x && yerVar(x))) setTimeout(bitti, 500);
+}
+
+function bitti() {
+  const yeni = skor > rekor;
+  if (yeni) { rekor = skor; try { localStorage.setItem('blok.rekor', rekor); } catch {} }
+  document.getElementById('son-yazi').textContent = yeni ? `Yeni rekor: ${skor} puan!` : `${skor} puan. Rekorun ${rekor}${rekor - skor < rekor * 0.2 ? ', çok yaklaşmıştın!' : '.'}`;
+  document.getElementById('son').hidden = false;
+  ton(262, 0.4, 'triangle', 0.1);
+}
+document.getElementById('tekrar').onclick = yeniOyun;
+
+// Sürükle bırak: parça parmağın biraz üstünde durur ki görülsün
+const tepsiMerkez = (i) => ({ x: W * (i + 0.5) / 3, y: tepsiY });
+function hedef() {
+  if (!surukle) return null;
+  const p = parcalar[surukle.i], [bw, bh] = boyut(p);
+  const gx = Math.round((surukle.x - tx) / hucre - bw / 2), gy = Math.round((surukle.y - ty) / hucre - bh / 2);
+  return sigar(p, gx, gy) ? { gx, gy } : null;
+}
+tuval.addEventListener('pointerdown', (e) => {
+  if (!ses) { ses = new (window.AudioContext || window.webkitAudioContext)(); }
+  ses.resume();
+  if (e.clientY < tepsiY - hucre * 1.5) return;
+  const i = Math.min(2, Math.floor(e.clientX / (W / 3)));
+  if (!parcalar[i]) return;
+  surukle = { i, x: e.clientX, y: e.clientY - (e.pointerType === 'touch' ? hucre * 2 : 0), dokunma: e.pointerType === 'touch' };
+  tuval.setPointerCapture(e.pointerId);
+});
+tuval.addEventListener('pointermove', (e) => { if (surukle) { surukle.x = e.clientX; surukle.y = e.clientY - (surukle.dokunma ? hucre * 2 : 0); } });
+tuval.addEventListener('pointerup', () => {
+  if (!surukle) return;
+  const h = hedef();
+  if (h) yerlestir(surukle.i, h.gx, h.gy); else ton(150, 0.1, 'sine', 0.05);
+  surukle = null;
+});
+
+function kare(x, y, b, renk, alfa = 1) {
+  g.globalAlpha = alfa; g.fillStyle = renk;
+  g.beginPath(); g.roundRect(x + 2, y + 2, b - 4, b - 4, b * 0.22); g.fill();
+  g.fillStyle = 'rgba(0,0,0,.22)'; g.beginPath(); g.roundRect(x + 2, y + b - b * 0.18, b - 4, b * 0.16 - 2, [0, 0, b * 0.22, b * 0.22]); g.fill();
+  g.globalAlpha = 1;
+}
+function parcaCiz(p, cx, cy, b, alfa) {
+  const [bw, bh] = boyut(p);
+  p.sekil.forEach(([x, y]) => kare(cx - (bw * b) / 2 + x * b, cy - (bh * b) / 2 + y * b, b, p.renk, alfa));
+}
+
+function ciz() {
+  g.setTransform(O, 0, 0, O, 0, 0);
+  g.fillStyle = '#0F1226'; g.fillRect(0, 0, W, H);
+  const sx = (Math.random() - 0.5) * 14 * sars, sy = (Math.random() - 0.5) * 14 * sars; sars *= 0.86;
+  g.translate(sx, sy);
+  gosterSkor += (skor - gosterSkor) * 0.2;
+  g.textAlign = 'center'; g.fillStyle = '#A3A8CC'; g.font = '500 12px Rubik, sans-serif';
+  g.fillText(`REKOR ${rekor}`, W / 2, ty - 58);
+  g.fillStyle = '#F2F3FA'; g.font = '800 40px Rubik, sans-serif'; g.fillText(Math.round(gosterSkor), W / 2, ty - 16);
+
+  g.fillStyle = '#161A35'; g.beginPath(); g.roundRect(tx - 8, ty - 8, hucre * N + 16, hucre * N + 16, 20); g.fill();
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    if (tahta[y][x]) kare(tx + x * hucre, ty + y * hucre, hucre, tahta[y][x]);
+    else { g.fillStyle = '#20264A'; g.beginPath(); g.roundRect(tx + x * hucre + 2, ty + y * hucre + 2, hucre - 4, hucre - 4, hucre * 0.2); g.fill(); }
+  }
+  const h = hedef();
+  if (h) parcalar[surukle.i].sekil.forEach(([x, y]) => kare(tx + (h.gx + x) * hucre, ty + (h.gy + y) * hucre, hucre, parcalar[surukle.i].renk, 0.35));
+
+  parcalar.forEach((p, i) => {
+    if (!p || (surukle && surukle.i === i)) return;
+    const m = tepsiMerkez(i);
+    parcaCiz(p, m.x, m.y, hucre * 0.55, yerVar(p) ? 1 : 0.3);
+  });
+  if (surukle) parcaCiz(parcalar[surukle.i], surukle.x, surukle.y, hucre, 0.95);
+
+  efekt.forEach((p) => { p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.omur -= 0.025; g.globalAlpha = Math.max(0, p.omur); g.fillStyle = p.renk; g.fillRect(p.x - 4, p.y - 4, 8, 8); });
+  efekt = efekt.filter((p) => p.omur > 0);
+  yazilar.forEach((y) => { g.globalAlpha = Math.max(0, Math.min(1, y.omur * 2)); g.fillStyle = y.renk; g.font = `800 ${y.boy}px Rubik, sans-serif`; g.fillText(y.metin, y.x, y.y - (1 - y.omur) * 40); y.omur -= 0.015; });
+  yazilar = yazilar.filter((y) => y.omur > 0);
+  g.globalAlpha = 1;
+  requestAnimationFrame(ciz);
+}
+yeniOyun();
+requestAnimationFrame(ciz);
+</script>
