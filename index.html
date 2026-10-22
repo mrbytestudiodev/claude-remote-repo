@@ -1,0 +1,153 @@
+<title>Zincir ve Kasa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="oyun.css">
+
+<div class="uygulama">
+
+  <!-- Ana menü -->
+  <section class="ekran" id="ekran-ana">
+    <header class="ana-bas">
+      <div>
+        <p class="etiket">BULMACA</p>
+        <h1 class="ana-baslik">Zincir ve Kasa</h1>
+      </div>
+      <div class="ana-sag">
+        <div class="hap hap-altin"><span data-ikon="altin"></span><span data-altin>100</span></div>
+        <button class="ikon-btn" id="ses-btn" aria-label="Sesi kapat"><span data-ikon="ses"></span></button>
+      </div>
+    </header>
+
+    <div class="oyun-listesi">
+      <button class="oyun-kart" data-git="zincir" style="--sira: 0">
+        <div class="oyun-gorsel gorsel-zincir" aria-hidden="true">
+          <span class="mini-tas" data-v="4">4</span>
+          <span class="mini-tas" data-v="8">8</span>
+          <span class="mini-tas" data-v="16">16</span>
+          <span class="mini-tas parla" data-v="128">128</span>
+        </div>
+        <div class="oyun-bilgi">
+          <h2>Zincir</h2>
+          <p>Sayıları düşür, aynıları birleştir, zinciri uzat. Hedefe ulaşınca joker seç.</p>
+          <span class="rozet" data-zincir-rekor>Rekor 0</span>
+        </div>
+      </button>
+
+      <button class="oyun-kart" data-git="kasa" style="--sira: 1">
+        <div class="oyun-gorsel gorsel-kasa" aria-hidden="true"><span data-ikon="kilit"></span></div>
+        <div class="oyun-bilgi">
+          <h2>Kasa Kırıcı</h2>
+          <p>İpuçlarından şifreyi çöz. Her açılan kasadan sürpriz bir ganimet çıkar.</p>
+          <span class="rozet" data-koleksiyon-rozet>Koleksiyon 0/18</span>
+        </div>
+      </button>
+
+      <button class="oyun-kart" data-git="gunluk" style="--sira: 2">
+        <div class="oyun-gorsel gorsel-gunluk" aria-hidden="true"><span data-ikon="alev"></span></div>
+        <div class="oyun-bilgi">
+          <h2>Günlük Kasa</h2>
+          <p>Herkese aynı şifre, günde tek şans. Her gün çöz, seriyi bozma.</p>
+          <span class="rozet" data-gunluk-rozet>Bugünün kasası hazır</span>
+        </div>
+      </button>
+    </div>
+
+    <button class="btn btn-ikincil" id="koleksiyon-btn" style="--sira: 3">
+      <span data-ikon="sandik"></span> Koleksiyonum <span class="soluk" data-koleksiyon-sayi>0/18</span>
+    </button>
+  </section>
+
+  <!-- Zincir -->
+  <section class="ekran" id="ekran-zincir" hidden>
+    <div class="ust-bar">
+      <button class="ikon-btn" data-geri aria-label="Ana menüye dön"><span data-ikon="geri"></span></button>
+      <div class="orta">
+        <p class="etiket">SKOR</p>
+        <p class="skor" id="z-skor">0</p>
+      </div>
+      <div class="sag">
+        <p class="etiket">REKOR</p>
+        <p class="rekor" id="z-rekor">0</p>
+      </div>
+    </div>
+
+    <div class="ilerleme-kutu">
+      <div class="ilerleme-satir">
+        <span id="z-seviye">Seviye 1</span>
+        <span id="z-hedef-yazi">Sonraki joker: 300 puan</span>
+      </div>
+      <div class="ilerleme"><div class="ilerleme-dolu" id="z-ilerleme"></div></div>
+    </div>
+
+    <div class="tahta-alan" id="z-alan">
+      <div class="tahta" id="z-tahta">
+        <div class="tahta-zemin" id="z-zemin"></div>
+        <div class="sutun-isik" id="z-isik"></div>
+        <div class="tas-katman" id="z-taslar"></div>
+        <div class="kombo" id="z-kombo" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="alt-bar">
+      <div class="siradaki">
+        <p class="etiket">SIRADAKİ</p>
+        <div class="siradaki-taslar" id="z-siradaki"></div>
+      </div>
+      <div class="jokerler">
+        <p class="etiket">JOKERLER</p>
+        <div class="joker-slotlar" id="z-jokerler"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Kasa Kırıcı ve Günlük Kasa -->
+  <section class="ekran" id="ekran-kasa" hidden>
+    <div class="ust-bar">
+      <button class="ikon-btn" data-geri aria-label="Ana menüye dön"><span data-ikon="geri"></span></button>
+      <h2 class="kasa-baslik" id="k-baslik">Kasa #1</h2>
+      <div class="sag"><div class="hap hap-altin"><span data-ikon="altin"></span><span data-altin>100</span></div></div>
+    </div>
+
+    <div class="kasa-kart">
+      <div class="kadran" id="k-kadran"><div class="kadran-ic"><span data-ikon="kilit"></span></div></div>
+      <div class="sans">
+        <p class="etiket" id="k-sans-baslik">ŞİMDİ AÇARSAN ÖDÜL ŞANSI</p>
+        <div class="sans-cubuk">
+          <span class="s-siradan" id="k-s1"></span><span class="s-nadir" id="k-s2"></span><span class="s-efsane" id="k-s3"></span>
+        </div>
+        <ul class="sans-liste">
+          <li><i class="nokta n-siradan"></i>Sıradan<b id="k-y1">%60</b></li>
+          <li><i class="nokta n-nadir"></i>Nadir<b id="k-y2">%30</b></li>
+          <li class="efsane-satir"><i class="nokta n-efsane"></i>Efsanevi<b id="k-y3">%10</b></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="deneme-bas">
+      <p class="etiket">DENEMELER</p>
+      <p class="hak" id="k-hak">8 hak kaldı</p>
+    </div>
+    <div class="denemeler" id="k-denemeler"></div>
+    <div class="lejant">
+      <span><i class="civi civi-yesil"></i>Doğru yerde</span>
+      <span><i class="civi civi-sari"></i>Var, yeri yanlış</span>
+    </div>
+
+    <div class="kasa-alt">
+      <button class="btn btn-ipucu" id="k-ipucu"><span data-ikon="soru"></span> İpucu al · 30 altın</button>
+      <div class="tuslar" id="k-tuslar"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="perde" id="perde" hidden>
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+</div>
+<div class="efekt-katman" id="efekt" aria-hidden="true"></div>
+
+<script src="js/ortak.js"></script>
+<script src="js/zincir.js"></script>
+<script src="js/kasa.js"></script>
+<script src="js/ana.js"></script>
